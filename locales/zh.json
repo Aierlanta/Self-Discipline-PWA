@@ -1,0 +1,18 @@
+{
+  "appName": "自律 PWA",
+  "switchLanguage": "切换语言",
+  "switchTheme": "切换主题",
+  "toggleDarkMode": "切换暗黑模式",
+  "toggleLightMode": "切换日间模式",
+  "language": "语言",
+  "theme": "主题",
+  "sleep": "睡眠",
+  "exercise": "运动",
+  "study": "学习",
+  "home": "首页",
+  "record": "记录",
+  "viewData": "查看数据",
+  "sleepHeatmapTitle": "睡眠时长热力图 (近3个月)",
+  "exerciseHeatmapTitle": "运动热力图 (近3个月)",
+  "studyHeatmapTitle": "学习热力图 (近3个月)"
+}

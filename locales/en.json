@@ -1,0 +1,18 @@
+{
+  "appName": "Self-Discipline PWA",
+  "switchLanguage": "Switch Language",
+  "switchTheme": "Switch Theme",
+  "toggleDarkMode": "Toggle Dark Mode",
+  "toggleLightMode": "Toggle Light Mode",
+  "language": "Language",
+  "theme": "Theme",
+  "sleep": "Sleep",
+  "exercise": "Exercise",
+  "study": "Study",
+  "home": "Home",
+  "record": "Record",
+  "viewData": "View Data",
+  "sleepHeatmapTitle": "Sleep Duration Heatmap (Last 3 Months)",
+  "exerciseHeatmapTitle": "Exercise Heatmap (Last 3 Months)",
+  "studyHeatmapTitle": "Study Heatmap (Last 3 Months)"
+}
