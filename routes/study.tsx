@@ -24,7 +24,8 @@ export default function StudyPage() {
       {/* Add Header */}
       <Header />
       {/* Main content container */}
-      <div class="container mx-auto p-4 mt-4 flex flex-col items-center space-y-8">
+      {/* Removed flex flex-col items-center to allow content to fill width */}
+      <div class="container mx-auto p-4 mt-4 space-y-8">
         {/* Use the PageTitle Island with an array of keys */}
         <PageTitle titleKey={["record", "study"]} />
         <StudyForm />

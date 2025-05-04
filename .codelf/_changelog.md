@@ -1,3 +1,53 @@
+## 2025-05-04 16:16:37
+
+### 1. Fix Button Text Visibility in Dark Mode
+
+**Change Type**: fix
+
+&gt; **Purpose**: To ensure button text is clearly visible in dark mode.
+&gt; **Detailed Description**:
+&gt; *   Modified `components/Button.tsx` to include specific Tailwind CSS classes for dark mode.
+&gt; *   Added default text color (`text-gray-800`) for light mode.
+&gt; *   Added dark mode styles: `dark:bg-gray-700`, `dark:text-gray-100`, `dark:border-gray-600`, `dark:hover:bg-gray-600`.
+&gt; *   Added disabled state styles: `disabled:opacity-50 disabled:cursor-not-allowed`.
+&gt; **Reason for Change**: Address user feedback that button text was unreadable against the button background in dark mode due to missing dark mode text color styles.
+&gt; **Impact Scope**: Affects the appearance of all instances of the `Button` component throughout the application in dark mode.
+&gt; **API Changes**: None.
+&gt; **Configuration Changes**: None.
+&gt; **Performance Impact**: None.
+
+   ```
+   self-discipline-pwa
+   - components/
+     - Button.tsx      // refact: Add dark mode and disabled styles
+   ```
+
+---
+## 2025-05-04 16:14:41
+
+### 1. Fix Page Layout Responsiveness
+
+**Change Type**: fix
+
+&gt; **Purpose**: To correct the layout on the Sleep, Exercise, and Study pages so that content properly fills the container width instead of being centered and compressed.
+&gt; **Detailed Description**:
+&gt; *   Removed the `flex flex-col items-center` classes from the main content container `div` in `routes/sleep.tsx`, `routes/exercise.tsx`, and `routes/study.tsx`.
+&gt; *   These classes were incorrectly causing the child components (forms, lists) to center horizontally within the container, preventing them from utilizing the full width provided by `container mx-auto`.
+&gt; **Reason for Change**: Address user feedback that pages other than the homepage were not adapting correctly to screen width, appearing squished in the center.
+&gt; **Impact Scope**: Affects the layout and appearance of `routes/sleep.tsx`, `routes/exercise.tsx`, and `routes/study.tsx`. Content on these pages should now be responsive like the homepage.
+&gt; **API Changes**: None.
+&gt; **Configuration Changes**: None.
+&gt; **Performance Impact**: None.
+
+   ```
+   self-discipline-pwa
+   - routes/
+     - sleep.tsx       // refact: Remove flex classes from container div
+     - exercise.tsx    // refact: Remove flex classes from container div
+     - study.tsx       // refact: Remove flex classes from container div
+   ```
+
+---
 ## 2025-05-04 16:05:08
 
 ### 1. Fix PWA Service Worker and Manifest Paths
