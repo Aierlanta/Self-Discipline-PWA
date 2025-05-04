@@ -1,3 +1,46 @@
+## 2025-05-04 15:49:36
+
+### 1. Fix Global i18n and State Persistence Issues
+
+**Change Type**: fix/refactor
+
+&gt; **Purpose**: To resolve issues where language/theme settings were lost on page navigation and page titles were not being translated correctly.
+&gt; **Detailed Description**:
+&gt; *   Implemented full internationalization (i18n) support within all relevant Island components (`SleepForm`, `SleepList`, `ExerciseForm`, `ExerciseList`, `StudyForm`, `StudyList`, `SleepHeatmapSection`, `ExerciseHeatmapSection`, `StudyHeatmapSection`) using `SettingsContext`. Added necessary translation keys to context interface and locale files.
+&gt; *   Resolved state persistence issue by refactoring `contexts/SettingsContext.tsx` to initialize state signals (`langSignal`, `themeSignal`) directly from `localStorage` at the module level (client-side), ensuring state is available before component render. Removed initialization logic from `SettingsProvider`'s `useEffect`. Added detailed logging for debugging.
+&gt; *   Fixed page titles (`<h1>`) not updating on language change by creating a new Island component `islands/PageTitle.tsx` responsible for rendering translated titles using the context. Replaced static `<h1>` tags in all route files (`routes/*.tsx`) with this new Island component.
+&gt; **Reason for Change**: Address user feedback regarding incomplete translation and state loss during navigation, likely due to timing issues between state initialization and component rendering in Fresh.
+&gt; **Impact Scope**: Affects state management (`SettingsContext.tsx`), all Island components handling user-visible text, all page route components (`routes/*.tsx`), locale files, and introduces `islands/PageTitle.tsx`. Significantly improves i18n consistency and state persistence.
+&gt; **API Changes**: None external. Internal context initialization logic changed.
+&gt; **Configuration Changes**: None.
+&gt; **Performance Impact**: Minimal. Initialization logic shifted. Added one small Island component.
+
+   ```
+   self-discipline-pwa
+   - contexts/
+     - SettingsContext.tsx // refact: Change state init logic, add logging
+   - islands/
+     - PageTitle.tsx       // add: New Island for rendering page titles
+     - SleepForm.tsx       // refact: Implement i18n using context
+     - SleepList.tsx       // refact: Implement i18n using context
+     - ExerciseForm.tsx    // refact: Implement i18n using context
+     - ExerciseList.tsx    // refact: Implement i18n using context
+     - StudyForm.tsx       // refact: Implement i18n using context
+     - StudyList.tsx       // refact: Implement i18n using context
+     - SleepHeatmapSection.tsx    // refact: Implement i18n using context
+     - ExerciseHeatmapSection.tsx // refact: Implement i18n using context
+     - StudyHeatmapSection.tsx     // refact: Implement i18n using context
+   - routes/
+     - index.tsx           // refact: Use PageTitle Island, remove direct h1 translation
+     - sleep.tsx           // refact: Use PageTitle Island, remove direct h1 translation
+     - exercise.tsx        // refact: Use PageTitle Island, remove direct h1 translation
+     - study.tsx           // refact: Use PageTitle Island, remove direct h1 translation
+   - locales/
+     - en.json             // refact: Add keys for all components
+     - zh.json             // refact: Add keys for all components
+   ```
+
+---
 ## 2025-05-03 17:29:30
 
 ### 1. Add Navigation Icons to Header

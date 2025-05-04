@@ -114,7 +114,7 @@ self-discipline-pwa/
 *   **IDE:** VS Code with Deno extension recommended.
 *   **Run Development Server:** `deno task start` (Starts the dev server on http://localhost:8000/)
 
-## Structure (Current as of 2025-05-03)
+## Structure (Current as of 2025-05-04)
 
 ```
 self-discipline-pwa/
@@ -145,6 +145,7 @@ self-discipline-pwa/
 │   ├── ExerciseHeatmapSection.tsx
 │   ├── ExerciseList.tsx
 │   ├── Heatmap.tsx     # Generic heatmap component
+│   ├── PageTitle.tsx   # Island for rendering translated page titles
 │   ├── SettingsManager.tsx # UI for language/theme switching (uses SettingsContext)
 │   ├── SleepForm.tsx
 │   ├── SleepHeatmapSection.tsx

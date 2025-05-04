@@ -15,6 +15,7 @@ import * as $ExerciseForm from "./islands/ExerciseForm.tsx";
 import * as $ExerciseHeatmapSection from "./islands/ExerciseHeatmapSection.tsx";
 import * as $ExerciseList from "./islands/ExerciseList.tsx";
 import * as $Heatmap from "./islands/Heatmap.tsx";
+import * as $PageTitle from "./islands/PageTitle.tsx";
 import * as $SettingsManager from "./islands/SettingsManager.tsx";
 import * as $SleepForm from "./islands/SleepForm.tsx";
 import * as $SleepHeatmapSection from "./islands/SleepHeatmapSection.tsx";
@@ -41,6 +42,7 @@ const manifest = {
     "./islands/ExerciseHeatmapSection.tsx": $ExerciseHeatmapSection,
     "./islands/ExerciseList.tsx": $ExerciseList,
     "./islands/Heatmap.tsx": $Heatmap,
+    "./islands/PageTitle.tsx": $PageTitle,
     "./islands/SettingsManager.tsx": $SettingsManager,
     "./islands/SleepForm.tsx": $SleepForm,
     "./islands/SleepHeatmapSection.tsx": $SleepHeatmapSection,
