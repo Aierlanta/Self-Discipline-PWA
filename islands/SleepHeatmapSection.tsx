@@ -13,7 +13,8 @@ interface HeatmapDataPoint {
 }
 
 // Function to process sleep records into heatmap data
-function processSleepDataForHeatmap(records: SleepRecord[]): HeatmapDataPoint[] {
+// Pass translation object 't' for tooltip formatting
+function processSleepDataForHeatmap(records: SleepRecord[], t: any): HeatmapDataPoint[] {
   const dataMap = new Map<string, number>(); // Date -> Total Duration Minutes
 
   records.forEach(record => {
@@ -32,7 +33,10 @@ function processSleepDataForHeatmap(records: SleepRecord[]): HeatmapDataPoint[] 
     return {
       date: date,
       value: hours, // Use hours for the heatmap value
-      tooltip: `${date}: ${hours} hours sleep`, // Tooltip can remain in English or be translated later if needed
+      // Use translated tooltip format if available
+      tooltip: t.tooltipSleep
+                 ? t.tooltipSleep.replace("{date}", date).replace("{hours}", hours.toString())
+                 : `${date}: ${hours} hours sleep`, // Fallback
     };
   });
 }
@@ -92,29 +96,34 @@ export default function SleepHeatmapSection() {
                 return recordDate >= startDate && recordDate <= endDate;
             } catch { return false; }
         });
-        const processedData = processSleepDataForHeatmap(filteredRecords);
+        // Pass currentT to the processing function
+        const processedData = processSleepDataForHeatmap(filteredRecords, currentT);
         setHeatmapData(processedData);
       } catch (err) {
         console.error("Failed to fetch or process sleep data for heatmap:", err);
-        setError(`Failed to load heatmap data: ${err instanceof Error ? err.message : String(err)}`);
+        const message = err instanceof Error ? err.message : String(err);
+        setError(currentT.errorLoadHeatmap.replace("{message}", message)); // Use translation
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchAndProcessData();
-  }, [startDate, endDate]); // Re-fetch if date range changes (though it's static here)
+  }, [startDate, endDate, currentT]); // Add currentT to dependency array if tooltip translation is used
 
+  // Use translated placeholder during SSR / initial client load
   if (!IS_BROWSER && isLoading) {
-     // Placeholder during SSR / initial client load
-    return <div class="mt-8 p-6 border rounded-lg shadow-md bg-white dark:bg-gray-800 text-center">Loading Sleep Heatmap...</div>;
+    return <div class="mt-8 p-6 border rounded-lg shadow-md bg-white dark:bg-gray-800 text-center">{currentT.loadingHeatmap}</div>;
   }
 
+  // Ensure the main return is present and correct
   return (
     <div class="mt-8 p-6 border rounded-lg shadow-md bg-white dark:bg-gray-800">
-      {isLoading && <p class="text-center text-gray-500 dark:text-gray-400">Loading heatmap data...</p>}
+      {/* Use translated loading text */}
+      {isLoading && <p class="text-center text-gray-500 dark:text-gray-400">{currentT.loadingHeatmapData}</p>}
       {error && (
          <div class="text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 p-3 rounded-md text-sm mb-4">
+          {/* Error message already translated */}
           {error}
         </div>
       )}
@@ -130,7 +139,8 @@ export default function SleepHeatmapSection() {
         />
       )}
        {!isLoading && !error && heatmapData.length === 0 && (
-         <p class="text-center text-gray-500 dark:text-gray-400 mt-4">No sleep data available for the selected period.</p> // Consider translating this too
+         // Use translated "no data" message, replacing placeholder
+         <p class="text-center text-gray-500 dark:text-gray-400 mt-4">{currentT.noDataHeatmap.replace("{dataType}", currentT.sleep)}</p>
       )}
     </div>
   );

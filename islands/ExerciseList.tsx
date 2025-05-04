@@ -1,11 +1,12 @@
-import { useState, useEffect } from "preact/hooks";
+import { useState, useEffect, useContext } from "preact/hooks"; // Import useContext
 import { IS_BROWSER } from "$fresh/runtime.ts";
 import type { ExerciseRecord } from "../types/records.ts";
 import { getAllExerciseRecords } from "../services/db.ts";
+import { SettingsContext } from "../contexts/SettingsContext.tsx"; // Import context
 
 // Helper function to format duration (reuse or move to utils later)
-function formatDuration(minutes: number): string {
-  if (minutes < 0) return "N/A";
+function formatDuration(minutes: number, t: any): string { // Pass t
+  if (minutes < 0) return t.durationNA; // Use translation
   const hours = Math.floor(minutes / 60);
   const mins = minutes % 60;
   if (hours > 0) {
@@ -15,19 +16,22 @@ function formatDuration(minutes: number): string {
 }
 
 // Helper function to format date/time (reuse or move to utils later)
-function formatDateTime(isoString: string): string {
+function formatDateTime(isoString: string, t: any): string { // Pass t
   try {
     return new Date(isoString).toLocaleString(undefined, {
         dateStyle: 'short',
         timeStyle: 'short',
     });
   } catch (e) {
-    return "Invalid Date";
+    return t.invalidDate; // Use translation
   }
 }
 
 
 export default function ExerciseList() {
+  const { t } = useContext(SettingsContext); // Get context
+  const currentT = t.value; // Access translations
+
   const [records, setRecords] = useState<ExerciseRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -43,7 +47,8 @@ export default function ExerciseList() {
         setRecords(fetchedRecords);
       } catch (err) {
         console.error("Failed to fetch exercise records:", err);
-        setError(`Failed to load records: ${err instanceof Error ? err.message : String(err)}`);
+        const message = err instanceof Error ? err.message : String(err);
+        setError(currentT.errorFailedToLoad.replace("{message}", message)); // Reuse translation
       } finally {
         setIsLoading(false);
       }
@@ -54,34 +59,35 @@ export default function ExerciseList() {
   }, []);
 
   if (!IS_BROWSER) {
-    return <div class="mt-8 p-6 border rounded-lg shadow-md bg-white dark:bg-gray-800 max-w-2xl mx-auto text-center text-gray-500 dark:text-gray-400">Loading records...</div>;
+    return <div class="mt-8 p-6 border rounded-lg shadow-md bg-white dark:bg-gray-800 max-w-2xl mx-auto text-center text-gray-500 dark:text-gray-400">{currentT.ssrLoadingRecords}</div>; // Reuse translation
   }
 
   return (
     <div class="mt-8 p-6 border rounded-lg shadow-md bg-white dark:bg-gray-800 max-w-2xl mx-auto">
-      <h2 class="text-xl font-semibold mb-4 text-center text-gray-800 dark:text-gray-200">Exercise History</h2>
-      {isLoading && <p class="text-center text-gray-500 dark:text-gray-400">Loading...</p>}
+      <h2 class="text-xl font-semibold mb-4 text-center text-gray-800 dark:text-gray-200">{currentT.exerciseHistoryTitle}</h2> {/* Use translation */}
+      {isLoading && <p class="text-center text-gray-500 dark:text-gray-400">{currentT.loading}</p>} {/* Reuse translation */}
       {error && (
          <div class="text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 p-3 rounded-md text-sm mb-4">
+          {/* Error message already translated */}
           {error}
         </div>
       )}
       {!isLoading && !error && records.length === 0 && (
-        <p class="text-center text-gray-500 dark:text-gray-400">No exercise records yet.</p>
+        <p class="text-center text-gray-500 dark:text-gray-400">{currentT.noExerciseRecords}</p> /* Use translation */
       )}
       {!isLoading && !error && records.length > 0 && (
         <ul class="space-y-3">
           {records.map((record) => (
             <li key={record.id} class="p-3 border-b border-gray-200 dark:border-gray-700 last:border-b-0 flex flex-col sm:flex-row justify-between items-start sm:items-center">
               <div>
-                 <p class="font-medium text-gray-800 dark:text-gray-200">{record.activity}</p>
+                 <p class="font-medium text-gray-800 dark:text-gray-200">{record.activity}</p> {/* Activity name is user input, not translated */}
                  <p class="text-sm text-gray-600 dark:text-gray-400">
-                   {formatDateTime(record.dateTime)}
+                   {formatDateTime(record.dateTime, currentT)} {/* Pass t */}
                  </p>
-                 {record.notes && <p class="text-xs mt-1 text-gray-500 dark:text-gray-400 italic">Notes: {record.notes}</p>}
+                 {record.notes && <p class="text-xs mt-1 text-gray-500 dark:text-gray-400 italic">{currentT.labelNotes} {record.notes}</p>} {/* Reuse translation */}
               </div>
               <p class="mt-2 sm:mt-0 text-lg font-semibold text-green-600 dark:text-green-400">
-                {formatDuration(record.durationMinutes)}
+                {formatDuration(record.durationMinutes, currentT)} {/* Pass t */}
               </p>
             </li>
           ))}

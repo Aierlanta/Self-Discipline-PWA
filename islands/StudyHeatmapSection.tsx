@@ -13,7 +13,8 @@ interface HeatmapDataPoint {
 }
 
 // Function to process study records into heatmap data
-function processStudyDataForHeatmap(records: StudyRecord[]): HeatmapDataPoint[] {
+// Pass translation object 't' for tooltip formatting (optional)
+function processStudyDataForHeatmap(records: StudyRecord[], t: any): HeatmapDataPoint[] {
   const dataMap = new Map<string, { count: number; totalMinutes: number; topics: Set<string> }>(); // Date -> { count, totalMinutes, topics }
 
   records.forEach(record => {
@@ -35,6 +36,7 @@ function processStudyDataForHeatmap(records: StudyRecord[]): HeatmapDataPoint[] 
       date: date,
       // Value: 1 if studied, 0 otherwise. Could also use data.totalMinutes for intensity.
       value: data.totalMinutes > 0 ? 1 : 0,
+      // Consider making tooltip translatable if needed, e.g., using a key like tooltipStudy
       tooltip: `${date}: Studied (${data.totalMinutes} min - ${topicList})`,
     };
   });
@@ -90,45 +92,52 @@ export default function StudyHeatmapSection() {
                 return recordDate >= startDate && recordDate <= endDate;
             } catch { return false; }
         });
-        const processedData = processStudyDataForHeatmap(filteredRecords);
+        // Pass currentT to processing function (for potential tooltip translation)
+        const processedData = processStudyDataForHeatmap(filteredRecords, currentT);
         setHeatmapData(processedData);
       } catch (err) {
         console.error("Failed to fetch or process study data for heatmap:", err);
-        setError(`Failed to load heatmap data: ${err instanceof Error ? err.message : String(err)}`);
+        const message = err instanceof Error ? err.message : String(err);
+        setError(currentT.errorLoadHeatmap.replace("{message}", message)); // Reuse translation
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchAndProcessData();
-  }, [startDate, endDate]);
+  }, [startDate, endDate, currentT]); // Add currentT dependency
 
-   if (!IS_BROWSER && isLoading) {
-    return <div class="mt-8 p-6 border rounded-lg shadow-md bg-white dark:bg-gray-800 text-center">Loading Study Heatmap...</div>;
-  }
+   // Reuse translated placeholder
+  if (!IS_BROWSER && isLoading) {
+   return <div class="mt-8 p-6 border rounded-lg shadow-md bg-white dark:bg-gray-800 text-center">{currentT.loadingHeatmap}</div>;
+ }
 
-  return (
-    <div class="mt-8 p-6 border rounded-lg shadow-md bg-white dark:bg-gray-800">
-      {isLoading && <p class="text-center text-gray-500 dark:text-gray-400">Loading heatmap data...</p>}
-      {error && (
-         <div class="text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 p-3 rounded-md text-sm mb-4">
-          {error}
-        </div>
-      )}
-      {!isLoading && !error && (
-        <Heatmap
-          data={heatmapData}
-          startDate={startDate}
-          endDate={endDate}
-          colorSteps={STUDY_COLORS}
-          valueToStep={studyValueToStep}
-          title={currentT.studyHeatmapTitle} // Use translated title from currentT
-          class="mx-auto"
-        />
-      )}
-       {!isLoading && !error && heatmapData.length === 0 && (
-         <p class="text-center text-gray-500 dark:text-gray-400 mt-4">No study data available for the selected period.</p> // Consider translating
-      )}
-    </div>
-  );
+ // Ensure the main return is present and correct
+ return (
+   <div class="mt-8 p-6 border rounded-lg shadow-md bg-white dark:bg-gray-800">
+     {/* Reuse translated loading text */}
+     {isLoading && <p class="text-center text-gray-500 dark:text-gray-400">{currentT.loadingHeatmapData}</p>}
+     {error && (
+        <div class="text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 p-3 rounded-md text-sm mb-4">
+         {/* Error message already translated */}
+         {error}
+       </div>
+     )}
+     {!isLoading && !error && (
+       <Heatmap
+         data={heatmapData}
+         startDate={startDate}
+         endDate={endDate}
+         colorSteps={STUDY_COLORS}
+         valueToStep={studyValueToStep}
+         title={currentT.studyHeatmapTitle} // Use translated title from currentT
+         class="mx-auto"
+       />
+     )}
+      {!isLoading && !error && heatmapData.length === 0 && (
+        // Reuse translated "no data" message, replacing placeholder
+        <p class="text-center text-gray-500 dark:text-gray-400 mt-4">{currentT.noDataHeatmap.replace("{dataType}", currentT.study)}</p>
+     )}
+   </div>
+ );
 }

@@ -63,7 +63,7 @@ self-discipline-pwa/
 - Unified error handling specifications: Define consistent error response formats.
 
 **Data Flow:**
-- Clear frontend state management: Using Preact Signals (`@preact/signals`) managed within a global Context (`SettingsContext.tsx`) for theme and language state. State is persisted in localStorage via effects in the provider. Components consume context via `useContext`.
+- Clear frontend state management: Using Preact Signals (`@preact/signals`) managed within a global Context (`SettingsContext.tsx`) for theme and language state. State is persisted in localStorage via effects in the provider. Both page components (`routes/*.tsx`) and interactive Island components (`islands/*.tsx`) consume this context via `useContext` to access state (like theme) and computed values (like translations `t`).
 - Data validation on both frontend (client-side islands) and backend (API routes).
 - Standardized asynchronous operation handling: Use `fetch` API within islands or server components.
 
