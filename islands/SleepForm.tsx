@@ -23,6 +23,7 @@ export default function SleepForm() {
 
     if (!sleepTime || !wakeTime) {
       setError(currentT.errorEnterTimes); // Use translation
+      setIsLoading(false); // Reset loading state on validation error
       return;
     }
 
@@ -31,11 +32,13 @@ export default function SleepForm() {
 
     if (isNaN(sleepDate.getTime()) || isNaN(wakeDate.getTime())) {
         setError(currentT.errorInvalidDate); // Use translation
+        setIsLoading(false); // Reset loading state on validation error
         return;
     }
 
     if (wakeDate <= sleepDate) {
       setError(currentT.errorWakeBeforeSleep); // Use translation
+      setIsLoading(false); // Reset loading state on validation error
       return;
     }
 

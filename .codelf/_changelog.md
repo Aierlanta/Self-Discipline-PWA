@@ -1,3 +1,84 @@
+## 2025-05-04 19:49:58
+
+### 1. Add Record Deletion Functionality
+
+**Change Type**: feature
+
+> **Purpose**: To allow users to delete individual sleep, exercise, and study records from their respective history lists.
+> **Detailed Description**:
+> *   Added `deleteSleepRecord`, `deleteExerciseRecord`, and `deleteStudyRecord` async functions to `services/db.ts` to handle record deletion from IndexedDB object stores (`sleepRecords`, `exerciseRecords`, `studyRecords`). These functions accept the record ID and an optional `onSuccessCallback`.
+> *   Modified `islands/SleepList.tsx`, `islands/ExerciseList.tsx`, and `islands/StudyList.tsx`:
+>     *   Imported the corresponding delete function from `services/db.ts`.
+>     *   Added a delete button (SVG trash can icon) next to each record item.
+>     *   Implemented an `handleDelete` async function triggered by the button click.
+>     *   Included a `window.confirm()` dialog to prevent accidental deletion, using new translation keys (`confirmDeleteSleep`, `confirmDeleteExercise`, `confirmDeleteStudy`).
+>     *   Called the appropriate delete function from `services/db.ts` upon confirmation, passing the record ID and the `incrementDataVersion` callback from `SettingsContext`.
+>     *   Updated the local component state (`records`) using `setRecords` to filter out the deleted record upon successful deletion, providing immediate UI feedback.
+>     *   Added error handling using `try...catch` to display failure messages using new translation keys (`errorFailedToDelete`, `errorFailedToDeleteExercise`, `errorFailedToDeleteStudy`).
+> *   Updated `contexts/SettingsContext.tsx` to include the new translation keys in the `Translations` interface.
+> *   Added the corresponding English and Chinese translations to `locales/en.json` and `locales/zh.json`.
+> **Reason for Change**: User request to enable management and removal of historical data entries.
+> **Impact Scope**: Affects data service (`db.ts`), all list components (`*List.tsx`), settings context (`SettingsContext.tsx`), and locale files. Introduces core data management capability.
+> **API Changes**: Added `deleteSleepRecord`, `deleteExerciseRecord`, `deleteStudyRecord` functions to the module exported by `services/db.ts`.
+> **Configuration Changes**: None.
+> **Performance Impact**: Minimal; adds small event handlers and IndexedDB delete operations.
+
+   ```
+   self-discipline-pwa
+   - services/
+     - db.ts           // add: deleteSleepRecord, deleteExerciseRecord, deleteStudyRecord functions
+   - islands/
+     - SleepList.tsx   // refact: Add delete button, handler, use deleteSleepRecord
+     - ExerciseList.tsx// refact: Add delete button, handler, use deleteExerciseRecord
+     - StudyList.tsx   // refact: Add delete button, handler, use deleteStudyRecord
+   - contexts/
+     - SettingsContext.tsx // refact: Add translation keys to interface
+   - locales/
+     - en.json         // refact: Add delete-related translations
+     - zh.json         // refact: Add delete-related translations
+   ```
+
+### 2. Fix Form Submit Button State on Validation Error
+
+**Change Type**: fix
+
+> **Purpose**: To prevent the submit button in data entry forms (`SleepForm`, `ExerciseForm`, `StudyForm`) from remaining in the "Logging..." state if client-side validation fails before attempting to save data.
+> **Detailed Description**:
+> *   Modified `handleSubmit` function in `islands/SleepForm.tsx`: Added `setIsLoading(false)` calls within the `if` blocks for validation checks (`!sleepTime || !wakeTime`, `isNaN(...)`, `wakeDate <= sleepDate`) before the `return` statement.
+> *   Modified `handleSubmit` function in `islands/ExerciseForm.tsx` and `islands/StudyForm.tsx`: Moved the `setIsLoading(true)` call to *after* all validation checks (`!dateTime || !activity/!topic || !duration`, `isNaN(durationMinutes)`, `isNaN(recordDate)`) have passed successfully, just before the `try...catch` block that performs the database operation.
+> **Reason for Change**: Corrects a bug where the loading state was prematurely set and not reset upon validation failure, forcing users to refresh the page to retry submission.
+> **Impact Scope**: Affects `islands/SleepForm.tsx`, `islands/ExerciseForm.tsx`, `islands/StudyForm.tsx`. Improves user experience by ensuring correct button state feedback.
+> **API Changes**: None.
+> **Configuration Changes**: None.
+> **Performance Impact**: None.
+
+   ```
+   self-discipline-pwa
+   - islands/
+     - SleepForm.tsx   // refact: Reset isLoading state on validation failure
+     - ExerciseForm.tsx// refact: Set isLoading state only after validation passes
+     - StudyForm.tsx   // refact: Set isLoading state only after validation passes
+   ```
+
+### 3. Fix Sleep Form Error Message Persistence
+
+**Change Type**: fix
+
+> **Purpose**: To ensure error messages displayed in the sleep form clear automatically when the user interacts with the input fields again.
+> **Detailed Description**: Added `setError(null)` calls within the `onInput` event handlers for the `sleepTime`, `wakeTime`, and `notes` input/textarea elements in `islands/SleepForm.tsx`.
+> **Reason for Change**: Improves user experience by removing potentially confusing or irrelevant error messages once the user attempts to correct the input.
+> **Impact Scope**: Affects `islands/SleepForm.tsx`.
+> **API Changes**: None.
+> **Configuration Changes**: None.
+> **Performance Impact**: None.
+
+   ```
+   self-discipline-pwa
+   - islands/
+     - SleepForm.tsx   // refact: Clear error state in onInput handlers
+   ```
+
+---
 ## 2025-05-04 16:16:37
 
 ### 1. Fix Button Text Visibility in Dark Mode

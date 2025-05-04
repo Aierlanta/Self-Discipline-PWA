@@ -25,20 +25,24 @@ export default function ExerciseForm() {
 
     if (!dateTime || !activity || !duration) {
       setError(currentT.errorFillAllFields); // Use translation
+      // No setIsLoading(false) needed here as it's set before the try block
       return;
     }
     if (isNaN(durationMinutes) || durationMinutes <= 0) {
         setError(currentT.errorPositiveDuration); // Use translation
+        // No setIsLoading(false) needed here as it's set before the try block
         return;
     }
 
      const recordDate = new Date(dateTime);
      if (isNaN(recordDate.getTime())) {
         setError(currentT.errorInvalidDate); // Reuse translation
+        // No setIsLoading(false) needed here as it's set before the try block
         return;
     }
 
 
+    // Set loading true only after validation passes
     setIsLoading(true);
 
     const partialRecord: Omit<ExerciseRecord, "id" | "createdAt"> = {

@@ -92,7 +92,7 @@ self-discipline-pwa/
 
 > The main purpose is to provide a simple, modern, and customizable interface for users to log and visualize their self-discipline efforts through heatmaps, daily summaries, and detailed lists.
 
-> Project Status: Core features implemented (logging, history view with **deletion for all record types**, heatmaps, daily summaries). Global settings functional. Basic PWA capabilities added. **Fixed sleep form error message persistence.**
+> Project Status: Core features implemented (logging, history view with **deletion for all record types**, heatmaps, daily summaries). Global settings functional. Basic PWA capabilities added. **Fixed form submission state on validation errors.** **Fixed sleep form error message persistence.**
 
 > Project Team: Roo (AI Engineer) and User
 
@@ -146,16 +146,16 @@ self-discipline-pwa/
 ├── islands/            # Interactive Preact components (Islands)
 │   ├── Counter.tsx     # Example counter (can be removed)
 │   ├── DailySummaryChart.tsx # Component for daily summary bar charts
-│   ├── ExerciseForm.tsx
+│   ├── ExerciseForm.tsx # Form for logging exercise (fixed submit state on validation error)
 │   ├── ExerciseHeatmapSection.tsx # Displays Exercise heatmap and daily summary chart
 │   ├── ExerciseList.tsx  # Displays exercise history with delete buttons
 │   ├── Heatmap.tsx     # Generic heatmap component
 │   ├── PageTitle.tsx   # Island for rendering translated page titles
 │   ├── SettingsManager.tsx # UI for language/theme switching (uses SettingsContext)
-│   ├── SleepForm.tsx   # Form for logging sleep (error messages now clear on input)
+│   ├── SleepForm.tsx   # Form for logging sleep (error messages clear on input, fixed submit state on validation error)
 │   ├── SleepHeatmapSection.tsx # Displays Sleep heatmap and daily summary chart
 │   ├── SleepList.tsx   # Displays sleep history with delete buttons
-│   ├── StudyForm.tsx
+│   ├── StudyForm.tsx   # Form for logging study (fixed submit state on validation error)
 │   ├── StudyHeatmapSection.tsx # Displays Study heatmap and daily summary chart
 │   └── StudyList.tsx   # Displays study history with delete buttons
 ├── locales/            # Internationalization (i18n) resource files
