@@ -1,3 +1,59 @@
+## 2025-05-04 16:05:08
+
+### 1. Fix PWA Service Worker and Manifest Paths
+
+**Change Type**: fix
+
+&gt; **Purpose**: To resolve the 404 errors preventing the Service Worker registration and manifest loading, enabling PWA installation and offline caching.
+&gt; **Detailed Description**:
+&gt; *   Corrected the paths used to reference `manifest.json` and `sw.js` in `routes/_app.tsx`. Changed `/static/manifest.json` to `/manifest.json` and `/static/sw.js` to `/sw.js`, aligning with how Fresh serves the `static` directory contents from the root.
+&gt; *   Corrected the paths within the `urlsToCache` array in `static/sw.js`, removing the `/static` prefix (e.g., `/static/styles.css` became `/styles.css`).
+&gt; *   Incremented the `CACHE_NAME` in `static/sw.js` to `v2` to ensure the updated Service Worker activates and clears the old cache.
+&gt; **Reason for Change**: The previous paths (`/static/...`) were incorrect, leading to 404 errors and preventing PWA features from working as intended.
+&gt; **Impact Scope**: Affects `routes/_app.tsx` (manifest link, SW registration path) and `static/sw.js` (cached URLs, cache version). Should fix PWA installation prompts and offline functionality.
+&gt; **API Changes**: None.
+&gt; **Configuration Changes**: None.
+&gt; **Performance Impact**: Enables offline caching, potentially improving performance after the first visit.
+
+   ```
+   self-discipline-pwa
+   - routes/
+     - _app.tsx        // refact: Correct manifest and SW registration paths
+   - static/
+     - sw.js           // refact: Correct cached URLs, increment cache version
+   ```
+
+---
+## 2025-05-04 15:58:43
+
+### 1. Implement PWA Features and Fix Theme Flicker
+
+**Change Type**: feature/fix
+
+&gt; **Purpose**: To enable Progressive Web App (PWA) capabilities like offline access and installability, and to resolve the theme flashing issue during page navigation.
+&gt; **Detailed Description**:
+&gt; *   Created `static/manifest.json` to define PWA metadata (name, icons, start URL, display mode).
+&gt; *   Created `static/sw.js` implementing a basic Service Worker with caching strategies (Network First for navigation, Cache First for static assets) to enable offline functionality.
+&gt; *   Modified `routes/_app.tsx`:
+&gt;     *   Added `<link rel="manifest" href="/static/manifest.json">` to the `<head>`.
+&gt;     *   Added a script to register the Service Worker (`/static/sw.js`) on window load.
+&gt;     *   Added an inline script in the `<head>` to apply the theme ('dark' class on `<html>`) directly from `localStorage` before the main component renders, preventing the flash of the default theme. Removed theme classes from `<body>` as they are now handled on `<html>`.
+&gt; **Reason for Change**: Address user request for PWA features (offline access, installability) and fix the jarring theme flicker during navigation, improving user experience.
+&gt; **Impact Scope**: Affects global application behavior (`_app.tsx`), introduces PWA core files (`manifest.json`, `sw.js`), and modifies how the theme is applied.
+&gt; **API Changes**: None.
+&gt; **Configuration Changes**: None.
+&gt; **Performance Impact**: Adds Service Worker for caching, potentially improving load times after the first visit and enabling offline access. Inline theme script runs very early to prevent flicker.
+
+   ```
+   self-discipline-pwa
+   - routes/
+     - _app.tsx        // refact: Add manifest link, SW registration, inline theme script
+   - static/
+     - manifest.json   // add: PWA Web App Manifest
+     - sw.js           // add: Service Worker script
+   ```
+
+---
 ## 2025-05-04 15:49:36
 
 ### 1. Fix Global i18n and State Persistence Issues

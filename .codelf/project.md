@@ -71,7 +71,7 @@ self-discipline-pwa/
 **Performance Optimization Focus:**
 - Resource loading optimization: Leverage Fresh's Islands architecture for minimal client-side JS. Use code splitting implicitly via Islands.
 - Rendering performance optimization: Server-side rendering by default, client-side hydration only for Islands.
-- Appropriate use of caching: Implement Service Worker caching for PWA offline capabilities and static assets. Consider API response caching if applicable.
+- Appropriate use of caching: Implemented basic Service Worker caching (`static/sw.js`) using a Network First strategy for navigation and Cache First for static assets. Handles core offline capabilities. Dynamic JS from Fresh Islands are currently handled by browser cache/network.
 
 **Security Measures:**
 - Input validation and filtering: Validate user inputs in API routes and potentially in Islands. Sanitize data before storing or displaying.
@@ -88,11 +88,11 @@ self-discipline-pwa/
 
 > The main purpose is to provide a simple, modern, and customizable interface for users to log and visualize their self-discipline efforts through heatmaps and summaries.
 
-> Project Status: Core features (sleep, exercise, study tracking with forms, lists, heatmaps) implemented. Global settings (language, theme) functional via Context API.
+> Project Status: Core features implemented. Global settings functional. Basic PWA capabilities (manifest, service worker for offline caching) added. Theme switching flicker addressed.
 
 > Project Team: Roo (AI Engineer) and User
 
-> Framework/language/other: Deno, Fresh (Web Framework), Preact (UI Library), TypeScript, Tailwind CSS (Styling), IndexedDB (Local Storage), Preact Signals (State Management), Preact Context (State Sharing)
+> Framework/language/other: Deno, Fresh (Web Framework), Preact (UI Library), TypeScript, Tailwind CSS (Styling), IndexedDB (Local Storage), Preact Signals (State Management), Preact Context (State Sharing), Service Worker (Caching), Web App Manifest (PWA Installability)
 
 ## Dependencies (From deno.json - Note: Iconify dependencies can be removed)
 
@@ -158,7 +158,7 @@ self-discipline-pwa/
 │   └── zh.json         # Chinese translations
 ├── routes/             # Page and API routes
 │   ├── _404.tsx        # 404 page
-│   ├── _app.tsx        # Main application shell (minimal, includes SettingsProvider wrapping Component)
+│   ├── _app.tsx        # Main application shell (includes SettingsProvider, PWA manifest link, SW registration, and theme application script)
 │   ├── exercise.tsx    # Exercise page route (renders Header)
 │   ├── index.tsx       # Home page route (Dashboard, renders Header)
 │   ├── sleep.tsx       # Sleep page route (renders Header)
@@ -171,8 +171,10 @@ self-discipline-pwa/
 │   └── db.ts           # IndexedDB service functions
 ├── static/             # Static assets
 │   ├── favicon.ico
-│   ├── logo.svg        # (Can be removed if not used)
-│   └── styles.css      # Main CSS file (includes Tailwind directives)
+│   ├── logo.svg        # (Used in manifest, keep or replace with proper icons)
+│   ├── manifest.json   # PWA Web App Manifest
+│   ├── styles.css      # Main CSS file (includes Tailwind directives)
+│   └── sw.js           # Service Worker script for caching
 └── types/              # TypeScript type definitions
     └── records.ts      # Core data type interfaces
 ```
