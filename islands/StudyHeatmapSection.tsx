@@ -1,27 +1,26 @@
-import { useState, useEffect, useMemo, useContext } from "preact/hooks"; // Added useContext
+import { useState, useEffect, useMemo, useContext } from "preact/hooks";
 import { IS_BROWSER } from "$fresh/runtime.ts";
-import { SettingsContext } from "../contexts/SettingsContext.tsx"; // Import context
+import { SettingsContext } from "../contexts/SettingsContext.tsx";
 import type { StudyRecord } from "../types/records.ts";
 import { getAllStudyRecords } from "../services/db.ts";
 import Heatmap from "./Heatmap.tsx";
+import DailySummaryChart from "./DailySummaryChart.tsx"; // Import the daily chart
 
-// Define HeatmapDataPoint locally if not exported from Heatmap.tsx
+// Define HeatmapDataPoint locally
 interface HeatmapDataPoint {
   date: string; // YYYY-MM-DD
-  value: number; // Use 1 for studied, 0 for not (or duration)
+  value: number; // Use total duration in minutes for study
   tooltip?: string;
 }
 
 // Function to process study records into heatmap data
-// Pass translation object 't' for tooltip formatting (optional)
 function processStudyDataForHeatmap(records: StudyRecord[], t: any): HeatmapDataPoint[] {
-  const dataMap = new Map<string, { count: number; totalMinutes: number; topics: Set<string> }>(); // Date -> { count, totalMinutes, topics }
+  const dataMap = new Map<string, { totalMinutes: number; topics: Set<string> }>(); // Date -> { totalMinutes, topics }
 
   records.forEach(record => {
     try {
         const dateKey = record.dateTime.substring(0, 10);
-        const existing = dataMap.get(dateKey) || { count: 0, totalMinutes: 0, topics: new Set() };
-        existing.count += 1;
+        const existing = dataMap.get(dateKey) || { totalMinutes: 0, topics: new Set() };
         existing.totalMinutes += record.durationMinutes;
         existing.topics.add(record.topic);
         dataMap.set(dateKey, existing);
@@ -34,40 +33,40 @@ function processStudyDataForHeatmap(records: StudyRecord[], t: any): HeatmapData
     const topicList = Array.from(data.topics).join(', ');
     return {
       date: date,
-      // Value: 1 if studied, 0 otherwise. Could also use data.totalMinutes for intensity.
-      value: data.totalMinutes > 0 ? 1 : 0,
-      // Consider making tooltip translatable if needed, e.g., using a key like tooltipStudy
-      tooltip: `${date}: Studied (${data.totalMinutes} min - ${topicList})`,
+      value: data.totalMinutes, // Use total minutes for heatmap value
+      // Consider making tooltip translatable
+      tooltip: `${date}: Studied ${data.totalMinutes} min (${topicList})`,
     };
   });
 }
 
-// Define the color steps for study (simple yes/no)
+// Define the color steps for study duration (example: 0, <30, 30-60, 60-120, 120+)
 const STUDY_COLORS: [string, string, string, string, string] = [
-  "#ebedf0", // 0: No study
-  "#a5b4fc", // 1: Studied (light blue/purple)
-  "#ebedf0", // 2: Not used
-  "#ebedf0", // 3: Not used
-  "#ebedf0", // 4: Not used
+  "#ebedf0", // 0 minutes (or no data)
+  "#c7d2fe", // < 30 minutes (light indigo)
+  "#a5b4fc", // 30-60 minutes (medium indigo)
+  "#818cf8", // 60-120 minutes (dark indigo)
+  "#6366f1", // 120+ minutes (darker indigo)
 ];
 
-// Map study value (0 or 1) to color steps
-const studyValueToStep = (value: number): 0 | 1 | 2 | 3 | 4 => {
-    return value > 0 ? 1 : 0;
+// Map study minutes to color steps
+const studyValueToStep = (minutes: number): 0 | 1 | 2 | 3 | 4 => {
+    if (minutes <= 0) return 0;
+    if (minutes < 30) return 1;
+    if (minutes < 60) return 2;
+    if (minutes < 120) return 3;
+    return 4;
 };
 
 
 export default function StudyHeatmapSection() {
-  // Get the translation signal 't' from context
   const { t } = useContext(SettingsContext);
-  // Access the current translation object using .value
   const currentT = t.value;
 
   const [heatmapData, setHeatmapData] = useState<HeatmapDataPoint[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Define the date range (reuse logic or move to utils)
   const { startDate, endDate } = useMemo(() => {
     const end = new Date();
     const start = new Date();
@@ -85,59 +84,68 @@ export default function StudyHeatmapSection() {
       setError(null);
       try {
         const allRecords = await getAllStudyRecords();
-        // Optional filtering by date range
          const filteredRecords = allRecords.filter(r => {
             try {
                 const recordDate = new Date(r.dateTime);
                 return recordDate >= startDate && recordDate <= endDate;
             } catch { return false; }
         });
-        // Pass currentT to processing function (for potential tooltip translation)
         const processedData = processStudyDataForHeatmap(filteredRecords, currentT);
         setHeatmapData(processedData);
       } catch (err) {
         console.error("Failed to fetch or process study data for heatmap:", err);
         const message = err instanceof Error ? err.message : String(err);
-        setError(currentT.errorLoadHeatmap.replace("{message}", message)); // Reuse translation
+        setError(currentT.errorLoadHeatmap.replace("{message}", message));
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchAndProcessData();
-  }, [startDate, endDate, currentT]); // Add currentT dependency
+  }, [startDate, endDate, currentT]);
 
    // Reuse translated placeholder
   if (!IS_BROWSER && isLoading) {
    return <div class="mt-8 p-6 border rounded-lg shadow-md bg-white dark:bg-gray-800 text-center">{currentT.loadingHeatmap}</div>;
  }
 
- // Ensure the main return is present and correct
  return (
-   <div class="mt-8 p-6 border rounded-lg shadow-md bg-white dark:bg-gray-800">
-     {/* Reuse translated loading text */}
-     {isLoading && <p class="text-center text-gray-500 dark:text-gray-400">{currentT.loadingHeatmapData}</p>}
-     {error && (
-        <div class="text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 p-3 rounded-md text-sm mb-4">
-         {/* Error message already translated */}
-         {error}
-       </div>
-     )}
-     {!isLoading && !error && (
-       <Heatmap
-         data={heatmapData}
-         startDate={startDate}
-         endDate={endDate}
-         colorSteps={STUDY_COLORS}
-         valueToStep={studyValueToStep}
-         title={currentT.studyHeatmapTitle} // Use translated title from currentT
-         class="mx-auto"
-       />
-     )}
-      {!isLoading && !error && heatmapData.length === 0 && (
-        // Reuse translated "no data" message, replacing placeholder
-        <p class="text-center text-gray-500 dark:text-gray-400 mt-4">{currentT.noDataHeatmap.replace("{dataType}", currentT.study)}</p>
-     )}
+   // Main container for the section
+   <div class="mt-8 p-4 md:p-6 border rounded-lg shadow-md bg-white dark:bg-gray-800 dark:border-gray-700">
+      <h2 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">{currentT.study}</h2>
+      {/* Container for charts, using flex for side-by-side layout on medium screens and up */}
+      <div class="flex flex-col md:flex-row gap-4 md:gap-6 items-start">
+         {/* Heatmap container */}
+         <div class="flex-grow w-full"> {/* Removed overflow-x-auto */}
+            <h3 class="text-lg font-medium mb-2 text-gray-700 dark:text-gray-300">{currentT.studyHeatmapTitle}</h3>
+            {isLoading && <p class="text-center text-gray-500 dark:text-gray-400">{currentT.loadingHeatmapData}</p>}
+            {error && (
+               <div class="text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 p-3 rounded-md text-sm mb-4">
+                 {error}
+               </div>
+            )}
+            {!isLoading && !error && heatmapData.length > 0 && (
+               <Heatmap
+                 data={heatmapData}
+                 startDate={startDate}
+                 endDate={endDate}
+                 colorSteps={STUDY_COLORS} // Use updated colors
+                 valueToStep={studyValueToStep} // Use updated step function
+                 class="mx-auto"
+               />
+            )}
+            {!isLoading && !error && heatmapData.length === 0 && (
+               <p class="text-center text-gray-500 dark:text-gray-400 mt-4">{currentT.noDataHeatmap.replace("{dataType}", currentT.study)}</p>
+            )}
+         </div>
+
+         {/* Daily Summary Chart container */}
+         {IS_BROWSER && (
+           <div class="w-full md:w-auto md:flex-shrink-0 mt-4 md:mt-0">
+               <DailySummaryChart recordType="study" titleKey="home.charts.studyTitle" days={7} />
+           </div>
+         )}
+      </div>
    </div>
  );
 }

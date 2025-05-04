@@ -6,7 +6,8 @@ import { addExerciseRecord } from "../services/db.ts";
 import { SettingsContext } from "../contexts/SettingsContext.tsx"; // Import context
 
 export default function ExerciseForm() {
-  const { t } = useContext(SettingsContext); // Get context
+  // Get context and data version updater
+  const { t, incrementDataVersion } = useContext(SettingsContext);
   const currentT = t.value; // Access translations
 
   const [dateTime, setDateTime] = useState("");
@@ -48,7 +49,8 @@ export default function ExerciseForm() {
     };
 
     try {
-      const newId = await addExerciseRecord(partialRecord);
+      // Pass incrementDataVersion as the callback
+      const newId = await addExerciseRecord(partialRecord, incrementDataVersion);
       console.log("New Exercise Record saved with ID:", newId);
       // Use translation for alert
       const alertMsg = currentT.alertExerciseLogged

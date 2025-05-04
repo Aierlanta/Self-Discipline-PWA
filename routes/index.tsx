@@ -6,6 +6,7 @@ import PageTitle from "../islands/PageTitle.tsx"; // Import the new Island
 import SleepHeatmapSection from "../islands/SleepHeatmapSection.tsx";
 import ExerciseHeatmapSection from "../islands/ExerciseHeatmapSection.tsx";
 import StudyHeatmapSection from "../islands/StudyHeatmapSection.tsx";
+import DailySummaryChart from "../islands/DailySummaryChart.tsx"; // Import the new chart component
 
 export default function Home() {
   // Get the translation signal 't' and 'lang' signal from context
@@ -28,9 +29,11 @@ export default function Home() {
       <div class="container mx-auto p-4 mt-4 space-y-8"> {/* Main content container */}
         {/* Use the PageTitle Island */}
         <PageTitle titleKey="home" />
+
+        {/* Heatmap sections will now include their respective summary charts */}
         <SleepHeatmapSection />
         <ExerciseHeatmapSection />
-        <StudyHeatmapSection /> {/* Add Study heatmap */}
+        <StudyHeatmapSection />
       </div>
     </>
   );

@@ -6,7 +6,8 @@ import { addSleepRecord } from "../services/db.ts"; // Import the DB function
 import { SettingsContext } from "../contexts/SettingsContext.tsx"; // Import context
 
 export default function SleepForm() {
-  const { t } = useContext(SettingsContext); // Get translation context
+  // Get translation context and data version updater
+  const { t, incrementDataVersion } = useContext(SettingsContext);
   const currentT = t.value; // Access translations
 
   const [sleepTime, setSleepTime] = useState("");
@@ -50,9 +51,10 @@ export default function SleepForm() {
     };
 
     try {
-      const newId = await addSleepRecord(partialRecord);
+      // Pass incrementDataVersion as the callback
+      const newId = await addSleepRecord(partialRecord, incrementDataVersion);
       console.log("New Sleep Record saved with ID:", newId);
-      // Use translations for alert, requires interpolation support in t() or manual construction
+      // Use translations for alert
       const hours = Math.floor(durationMinutes / 60);
       const minutes = durationMinutes % 60;
       const durationString = currentT.alertDuration

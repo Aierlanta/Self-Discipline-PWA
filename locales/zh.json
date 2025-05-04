@@ -64,5 +64,12 @@
   "loadingHeatmapData": "正在加载热力图数据...",
   "errorLoadHeatmap": "加载热力图数据失败: {message}",
   "noDataHeatmap": "选定时间段内无{dataType}数据。",
-  "tooltipSleep": "{date}: 睡眠 {hours} 小时"
+  "tooltipSleep": "{date}: 睡眠 {hours} 小时",
+  "home.charts.sleepTitle": "每日睡眠概览",
+  "home.charts.exerciseTitle": "每日运动概览",
+  "home.charts.studyTitle": "每日学习概览",
+  "home.charts.lastDays": "最近 {count} 天",
+  "home.charts.loading": "正在加载图表数据...",
+  "home.charts.errorLoading": "加载图表数据失败。",
+  "home.charts.noData": "此期间暂无数据。"
 }

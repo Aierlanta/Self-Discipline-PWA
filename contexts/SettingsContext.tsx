@@ -111,6 +111,14 @@ interface Translations {
   errorLoadHeatmap: string; // e.g., "Failed to load heatmap data: {message}"
   noDataHeatmap: string; // e.g., "No {dataType} data available for the selected period."
   tooltipSleep: string; // e.g., "{date}: {hours} hours sleep" (Optional)
+  // Daily Summary Chart keys
+  "home.charts.sleepTitle": string;
+  "home.charts.exerciseTitle": string;
+  "home.charts.studyTitle": string;
+  "home.charts.lastDays": string; // e.g., "Last {count} days"
+  "home.charts.loading": string;
+  "home.charts.errorLoading": string;
+  "home.charts.noData": string;
 }
 
 // --- Define Context Shape (Pass Signals + setters) ---
@@ -120,6 +128,9 @@ interface SettingsContextProps {
   t: Signal<Translations>;
   setLang: (lang: Lang) => void;
   setTheme: (theme: Theme) => void;
+  // Re-add data version signal and updater
+  dataVersion: Signal<number>;
+  incrementDataVersion: () => void;
 }
 
 // --- Create Module-Level Signals with Initial Values from localStorage ---
@@ -136,9 +147,12 @@ const translations: Record<Lang, Translations> = {
 const tSignal = computed<Translations>(() => {
     console.log(`[SettingsContext] tSignal computed. langSignal is: ${langSignal.value}`);
     return translations[langSignal.value];
-});
-
-// --- Functions to update module-level signals ---
+  });
+  
+  // --- Data Version Signal ---
+  const dataVersionSignal = signal(0); // Initialize data version
+  
+  // --- Functions to update module-level signals ---
 const setLang = (newLang: Lang) => {
   console.log(`[SettingsContext] setLang called with: ${newLang}. Current value: ${langSignal.peek()}`);
   if (newLang !== langSignal.peek()) {
@@ -156,6 +170,12 @@ const setTheme = (newTheme: Theme) => {
    } else {
        console.log(`[SettingsContext] setTheme skipped, already ${newTheme}`);
    }
+};
+
+// Re-add incrementDataVersion function
+const incrementDataVersion = () => {
+    dataVersionSignal.value++;
+    console.log(`[SettingsContext] Data version incremented to: ${dataVersionSignal.value}`);
 };
 
 // --- Effects for Persistence and Applying Side Effects (Run globally on client) ---
@@ -201,6 +221,9 @@ export const SettingsContext = createContext<SettingsContextProps>({
   t: tSignal,
   setLang: setLang,
   setTheme: setTheme,
+  // Re-add dataVersion and incrementDataVersion
+  dataVersion: dataVersionSignal,
+  incrementDataVersion: incrementDataVersion,
 });
 
 // --- Create Provider Component ---
@@ -217,6 +240,9 @@ export function SettingsProvider({ children }: { children: preact.ComponentChild
     t: tSignal,
     setLang,
     setTheme,
+    // Re-add dataVersion and incrementDataVersion
+    dataVersion: dataVersionSignal,
+    incrementDataVersion,
   };
 
   // Provider just passes the stable context value down.

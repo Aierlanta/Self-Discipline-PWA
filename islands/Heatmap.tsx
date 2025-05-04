@@ -162,11 +162,12 @@ export default function Heatmap({
 
   // --- Event Handlers (only attach if IS_BROWSER) ---
   const handleMouseOver = IS_BROWSER ? (e: MouseEvent, week: typeof weeks[0]) => {
-    const rect = (e.target as SVGRectElement).getBoundingClientRect();
+    // Use clientX/clientY relative to the viewport for positioning
+    // The tooltip itself will be positioned absolutely within the relative parent div
     setTooltip({
       text: week.tooltip,
-      x: rect.left + window.scrollX + rect.width / 2, // Center tooltip horizontally
-      y: rect.top + window.scrollY - 10, // Position above the cell
+      x: e.clientX, // Use viewport X coordinate
+      y: e.clientY, // Use viewport Y coordinate
     });
   } : undefined;
 
@@ -222,10 +223,12 @@ export default function Heatmap({
       {IS_BROWSER && tooltip && (
         <div
           class="absolute z-10 px-2 py-1 text-xs text-white bg-gray-900 dark:bg-gray-700 rounded shadow-lg pointer-events-none"
+          // Position fixed relative to viewport, near the cursor
           style={{
-            left: `${tooltip.x}px`,
-            top: `${tooltip.y}px`,
-            transform: 'translateX(-50%) translateY(-100%)', // Adjust position
+            left: `${tooltip.x + 10}px`, // Offset slightly from cursor
+            top: `${tooltip.y - 20}px`, // Offset slightly above cursor
+            position: 'fixed', // Use fixed positioning relative to viewport
+            // transform: 'translateX(-50%) translateY(-100%)', // Remove transform for simpler fixed positioning
           }}
         >
           {tooltip.text}

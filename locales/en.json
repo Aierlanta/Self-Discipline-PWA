@@ -64,5 +64,12 @@
   "loadingHeatmapData": "Loading heatmap data...",
   "errorLoadHeatmap": "Failed to load heatmap data: {message}",
   "noDataHeatmap": "No {dataType} data available for the selected period.",
-  "tooltipSleep": "{date}: {hours} hours sleep"
+  "tooltipSleep": "{date}: {hours} hours sleep",
+  "home.charts.sleepTitle": "Daily Sleep Summary",
+  "home.charts.exerciseTitle": "Daily Exercise Summary",
+  "home.charts.studyTitle": "Daily Study Summary",
+  "home.charts.lastDays": "Last {count} days",
+  "home.charts.loading": "Loading chart data...",
+  "home.charts.errorLoading": "Error loading chart data.",
+  "home.charts.noData": "No data available for this period."
 }

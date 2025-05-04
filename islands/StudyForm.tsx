@@ -6,7 +6,8 @@ import { addStudyRecord } from "../services/db.ts";
 import { SettingsContext } from "../contexts/SettingsContext.tsx"; // Import context
 
 export default function StudyForm() {
-  const { t } = useContext(SettingsContext); // Get context
+  // Get context and data version updater
+  const { t, incrementDataVersion } = useContext(SettingsContext);
   const currentT = t.value; // Access translations
 
   const [dateTime, setDateTime] = useState("");
@@ -47,7 +48,8 @@ export default function StudyForm() {
     };
 
     try {
-      const newId = await addStudyRecord(partialRecord);
+      // Pass incrementDataVersion as the callback
+      const newId = await addStudyRecord(partialRecord, incrementDataVersion);
       console.log("New Study Record saved with ID:", newId);
       // Use translation for alert
       const alertMsg = currentT.alertStudyLogged

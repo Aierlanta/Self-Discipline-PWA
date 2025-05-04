@@ -36,3 +36,15 @@ export interface StudyRecord {
 
 // Maybe add a union type later if needed for generic handling
 // export type AnyRecord = SleepRecord | ExerciseRecord | StudyRecord;
+/**
+ * Union type representing the possible record categories.
+ */
+export type RecordType = 'sleep' | 'exercise' | 'study';
+
+/**
+ * Represents aggregated data for a single day.
+ */
+export interface DailySummary {
+  date: string; // Format: YYYY-MM-DD
+  totalDuration: number; // Duration in hours for sleep, minutes for exercise/study
+}

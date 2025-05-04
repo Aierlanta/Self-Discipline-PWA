@@ -2,6 +2,8 @@
 
 ## Development Guidelines
 
+这是一个将要部署在deno上的pwa应用
+
 ### Framework and Language
 > Analyze the framework and language choices for this project, focusing on best practices and standardization.
 
@@ -63,7 +65,8 @@ self-discipline-pwa/
 - Unified error handling specifications: Define consistent error response formats.
 
 **Data Flow:**
-- Clear frontend state management: Using Preact Signals (`@preact/signals`) managed within a global Context (`SettingsContext.tsx`) for theme and language state. State is persisted in localStorage via effects in the provider. Both page components (`routes/*.tsx`) and interactive Island components (`islands/*.tsx`) consume this context via `useContext` to access state (like theme) and computed values (like translations `t`).
+- Clear frontend state management: Using Preact Signals (`@preact/signals`) managed within a global Context (`SettingsContext.tsx`) for theme and language state. State is persisted in localStorage via effects in the provider. Page components (`routes/*.tsx`) and interactive Island components (`islands/*.tsx`) consume this context via `useContext` to access state (like theme) and computed values (like translations `t`).
+- Data Fetching in Islands: Components like `DailySummaryChart.tsx` fetch data directly from `services/db.ts` (using functions like `getDailySummaries`) within `useEffect` hooks.
 - Data validation on both frontend (client-side islands) and backend (API routes).
 - Standardized asynchronous operation handling: Use `fetch` API within islands or server components.
 
@@ -86,9 +89,9 @@ self-discipline-pwa/
 
 > A Progressive Web Application (PWA) built with Deno and Fresh for tracking personal habits like sleep, exercise, and study.
 
-> The main purpose is to provide a simple, modern, and customizable interface for users to log and visualize their self-discipline efforts through heatmaps and summaries.
+> The main purpose is to provide a simple, modern, and customizable interface for users to log and visualize their self-discipline efforts through heatmaps, daily summaries, and detailed lists.
 
-> Project Status: Core features implemented. Global settings functional. Basic PWA capabilities (manifest, service worker for offline caching) added. Theme switching flicker addressed.
+> Project Status: Core features implemented. Global settings functional. Basic PWA capabilities added. Homepage dashboard refactored to display daily summary charts within their respective heatmap sections.
 
 > Project Team: Roo (AI Engineer) and User
 
@@ -141,17 +144,18 @@ self-discipline-pwa/
 │   └── SettingsContext.tsx # Context for managing language and theme state
 ├── islands/            # Interactive Preact components (Islands)
 │   ├── Counter.tsx     # Example counter (can be removed)
+│   ├── DailySummaryChart.tsx # Component for daily summary bar charts
 │   ├── ExerciseForm.tsx
-│   ├── ExerciseHeatmapSection.tsx
+│   ├── ExerciseHeatmapSection.tsx # Displays Exercise heatmap and daily summary chart
 │   ├── ExerciseList.tsx
 │   ├── Heatmap.tsx     # Generic heatmap component
 │   ├── PageTitle.tsx   # Island for rendering translated page titles
 │   ├── SettingsManager.tsx # UI for language/theme switching (uses SettingsContext)
 │   ├── SleepForm.tsx
-│   ├── SleepHeatmapSection.tsx
+│   ├── SleepHeatmapSection.tsx # Displays Sleep heatmap and daily summary chart
 │   ├── SleepList.tsx
 │   ├── StudyForm.tsx
-│   ├── StudyHeatmapSection.tsx
+│   ├── StudyHeatmapSection.tsx # Displays Study heatmap and daily summary chart
 │   └── StudyList.tsx
 ├── locales/            # Internationalization (i18n) resource files
 │   ├── en.json         # English translations
@@ -160,7 +164,7 @@ self-discipline-pwa/
 │   ├── _404.tsx        # 404 page
 │   ├── _app.tsx        # Main application shell (includes SettingsProvider, PWA manifest link, SW registration, and theme application script)
 │   ├── exercise.tsx    # Exercise page route (renders Header)
-│   ├── index.tsx       # Home page route (Dashboard, renders Header)
+│   ├── index.tsx       # Home page route (Dashboard displaying combined heatmap/chart sections, renders Header)
 │   ├── sleep.tsx       # Sleep page route (renders Header)
 │   ├── study.tsx       # Study page route (renders Header)
 │   ├── api/            # Backend API endpoints
@@ -168,7 +172,7 @@ self-discipline-pwa/
 │   └── greet/
 │       └── [name].tsx  # Example dynamic route
 ├── services/           # Data interaction services
-│   └── db.ts           # IndexedDB service functions
+│   └── db.ts           # IndexedDB service functions (includes getDailySummaries)
 ├── static/             # Static assets
 │   ├── favicon.ico
 │   ├── logo.svg        # (Used in manifest, keep or replace with proper icons)

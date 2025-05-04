@@ -11,6 +11,7 @@ import * as $index from "./routes/index.tsx";
 import * as $sleep from "./routes/sleep.tsx";
 import * as $study from "./routes/study.tsx";
 import * as $Counter from "./islands/Counter.tsx";
+import * as $DailySummaryChart from "./islands/DailySummaryChart.tsx";
 import * as $ExerciseForm from "./islands/ExerciseForm.tsx";
 import * as $ExerciseHeatmapSection from "./islands/ExerciseHeatmapSection.tsx";
 import * as $ExerciseList from "./islands/ExerciseList.tsx";
@@ -38,6 +39,7 @@ const manifest = {
   },
   islands: {
     "./islands/Counter.tsx": $Counter,
+    "./islands/DailySummaryChart.tsx": $DailySummaryChart,
     "./islands/ExerciseForm.tsx": $ExerciseForm,
     "./islands/ExerciseHeatmapSection.tsx": $ExerciseHeatmapSection,
     "./islands/ExerciseList.tsx": $ExerciseList,

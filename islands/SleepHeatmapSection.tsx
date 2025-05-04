@@ -1,9 +1,10 @@
-import { useState, useEffect, useMemo, useContext } from "preact/hooks"; // Added useContext
+import { useState, useEffect, useMemo, useContext } from "preact/hooks";
 import { IS_BROWSER } from "$fresh/runtime.ts";
-import { SettingsContext } from "../contexts/SettingsContext.tsx"; // Import context
+import { SettingsContext } from "../contexts/SettingsContext.tsx";
 import type { SleepRecord } from "../types/records.ts";
 import { getAllSleepRecords } from "../services/db.ts";
-import Heatmap from "./Heatmap.tsx"; // Assuming HeatmapDataPoint is defined within Heatmap.tsx for now
+import Heatmap from "./Heatmap.tsx";
+import DailySummaryChart from "./DailySummaryChart.tsx"; // Import the daily chart
 
 // Define HeatmapDataPoint locally if not exported from Heatmap.tsx
 interface HeatmapDataPoint {
@@ -13,27 +14,27 @@ interface HeatmapDataPoint {
 }
 
 // Function to process sleep records into heatmap data
-// Pass translation object 't' for tooltip formatting
 function processSleepDataForHeatmap(records: SleepRecord[], t: any): HeatmapDataPoint[] {
-  const dataMap = new Map<string, number>(); // Date -> Total Duration Minutes
+  const dataMap = new Map<string, number>(); // Date -> Total Duration Hours
 
   records.forEach(record => {
     try {
         // Extract date part (YYYY-MM-DD) from sleepTime
         const dateKey = record.sleepTime.substring(0, 10);
         const currentDuration = dataMap.get(dateKey) || 0;
-        dataMap.set(dateKey, currentDuration + record.durationMinutes);
+        // Assuming durationMinutes is always present as per type definition
+        const durationHours = record.durationMinutes / 60;
+        dataMap.set(dateKey, currentDuration + durationHours); // Store hours directly
     } catch (e) {
         console.error("Error processing record date:", record.sleepTime, e);
     }
   });
 
-  return Array.from(dataMap.entries()).map(([date, totalMinutes]) => {
-    const hours = Math.round(totalMinutes / 60 * 10) / 10; // Duration in hours (1 decimal place)
+  return Array.from(dataMap.entries()).map(([date, totalHours]) => {
+    const hours = Math.round(totalHours * 10) / 10; // Round to 1 decimal place
     return {
       date: date,
       value: hours, // Use hours for the heatmap value
-      // Use translated tooltip format if available
       tooltip: t.tooltipSleep
                  ? t.tooltipSleep.replace("{date}", date).replace("{hours}", hours.toString())
                  : `${date}: ${hours} hours sleep`, // Fallback
@@ -53,7 +54,7 @@ const SLEEP_COLORS: [string, string, string, string, string] = [
 // Map sleep hours to color steps
 const sleepValueToStep = (hours: number): 0 | 1 | 2 | 3 | 4 => {
     if (hours <= 0) return 0;
-    if (hours < 4) return 0; // Or maybe 1 if you want to show very short sleep
+    if (hours < 4) return 0;
     if (hours < 6) return 1;
     if (hours < 7) return 2;
     if (hours < 9) return 3;
@@ -62,21 +63,18 @@ const sleepValueToStep = (hours: number): 0 | 1 | 2 | 3 | 4 => {
 
 
 export default function SleepHeatmapSection() {
-  // Get the translation signal 't' from context
   const { t } = useContext(SettingsContext);
-  // Access the current translation object using .value
   const currentT = t.value;
 
   const [heatmapData, setHeatmapData] = useState<HeatmapDataPoint[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Define the date range for the heatmap (e.g., last 3 months)
   const { startDate, endDate } = useMemo(() => {
     const end = new Date();
     const start = new Date();
-    start.setMonth(start.getMonth() - 3); // Go back 3 months
-    start.setDate(1); // Start from the beginning of that month for cleaner look
+    start.setMonth(start.getMonth() - 3);
+    start.setDate(1);
     return { startDate: start, endDate: end };
   }, []);
 
@@ -89,59 +87,69 @@ export default function SleepHeatmapSection() {
       setError(null);
       try {
         const allRecords = await getAllSleepRecords();
-        // Filter records within the date range (optional, but good for performance if many records)
         const filteredRecords = allRecords.filter(r => {
             try {
                 const recordDate = new Date(r.sleepTime);
                 return recordDate >= startDate && recordDate <= endDate;
             } catch { return false; }
         });
-        // Pass currentT to the processing function
         const processedData = processSleepDataForHeatmap(filteredRecords, currentT);
         setHeatmapData(processedData);
       } catch (err) {
         console.error("Failed to fetch or process sleep data for heatmap:", err);
         const message = err instanceof Error ? err.message : String(err);
-        setError(currentT.errorLoadHeatmap.replace("{message}", message)); // Use translation
+        setError(currentT.errorLoadHeatmap.replace("{message}", message));
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchAndProcessData();
-  }, [startDate, endDate, currentT]); // Add currentT to dependency array if tooltip translation is used
+  }, [startDate, endDate, currentT]);
 
-  // Use translated placeholder during SSR / initial client load
+  // Placeholder during SSR / initial client load
   if (!IS_BROWSER && isLoading) {
     return <div class="mt-8 p-6 border rounded-lg shadow-md bg-white dark:bg-gray-800 text-center">{currentT.loadingHeatmap}</div>;
   }
 
-  // Ensure the main return is present and correct
   return (
-    <div class="mt-8 p-6 border rounded-lg shadow-md bg-white dark:bg-gray-800">
-      {/* Use translated loading text */}
-      {isLoading && <p class="text-center text-gray-500 dark:text-gray-400">{currentT.loadingHeatmapData}</p>}
-      {error && (
-         <div class="text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 p-3 rounded-md text-sm mb-4">
-          {/* Error message already translated */}
-          {error}
-        </div>
-      )}
-      {!isLoading && !error && (
-        <Heatmap
-          data={heatmapData}
-          startDate={startDate}
-          endDate={endDate}
-          colorSteps={SLEEP_COLORS}
-          valueToStep={sleepValueToStep}
-          title={currentT.sleepHeatmapTitle} // Use translated title from currentT
-          class="mx-auto" // Center the heatmap SVG if container is wider
-        />
-      )}
-       {!isLoading && !error && heatmapData.length === 0 && (
-         // Use translated "no data" message, replacing placeholder
-         <p class="text-center text-gray-500 dark:text-gray-400 mt-4">{currentT.noDataHeatmap.replace("{dataType}", currentT.sleep)}</p>
-      )}
+    // Main container for the section
+    <div class="mt-8 p-4 md:p-6 border rounded-lg shadow-md bg-white dark:bg-gray-800 dark:border-gray-700">
+       <h2 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">{currentT.sleep}</h2>
+       {/* Container for charts, using flex for side-by-side layout on medium screens and up */}
+       <div class="flex flex-col md:flex-row gap-4 md:gap-6 items-start">
+          {/* Heatmap container */}
+          <div class="flex-grow w-full"> {/* Removed overflow-x-auto */}
+             <h3 class="text-lg font-medium mb-2 text-gray-700 dark:text-gray-300">{currentT.sleepHeatmapTitle}</h3>
+             {isLoading && <p class="text-center text-gray-500 dark:text-gray-400">{currentT.loadingHeatmapData}</p>}
+             {error && (
+                <div class="text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 p-3 rounded-md text-sm mb-4">
+                  {error}
+                </div>
+             )}
+             {!isLoading && !error && heatmapData.length > 0 && (
+                <Heatmap
+                  data={heatmapData}
+                  startDate={startDate}
+                  endDate={endDate}
+                  colorSteps={SLEEP_COLORS}
+                  valueToStep={sleepValueToStep}
+                  class="mx-auto" // Keep centering if needed
+                />
+             )}
+             {!isLoading && !error && heatmapData.length === 0 && (
+                <p class="text-center text-gray-500 dark:text-gray-400 mt-4">{currentT.noDataHeatmap.replace("{dataType}", currentT.sleep)}</p>
+             )}
+          </div>
+
+          {/* Daily Summary Chart container */}
+          {/* Render DailySummaryChart only on the client */}
+          {IS_BROWSER && (
+            <div class="w-full md:w-auto md:flex-shrink-0 mt-4 md:mt-0"> {/* Add margin top for small screens */}
+                <DailySummaryChart recordType="sleep" titleKey="home.charts.sleepTitle" days={7} />
+            </div>
+          )}
+       </div>
     </div>
   );
 }
