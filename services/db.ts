@@ -125,6 +125,28 @@ export async function getAllSleepRecords(): Promise<SleepRecord[]> {
     });
 }
 
+export async function deleteSleepRecord(
+  id: string,
+  onSuccessCallback?: () => void
+): Promise<void> {
+  const db = await getDb();
+  const transaction = db.transaction(SLEEP_STORE, "readwrite");
+  const store = transaction.objectStore(SLEEP_STORE);
+
+  return new Promise((resolve, reject) => {
+    const request = store.delete(id);
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error);
+    transaction.oncomplete = () => {
+      console.log(`Sleep record ${id} deleted. Transaction complete.`);
+      if (onSuccessCallback) {
+        console.log("Calling onSuccessCallback for deleteSleepRecord.");
+        onSuccessCallback();
+      }
+    };
+    transaction.onerror = () => reject(transaction.error);
+  });
+}
 // --- Exercise Records ---
 
 export async function addExerciseRecord(
@@ -182,6 +204,28 @@ export async function getAllExerciseRecords(): Promise<ExerciseRecord[]> {
     });
 }
 
+export async function deleteExerciseRecord(
+  id: string,
+  onSuccessCallback?: () => void
+): Promise<void> {
+  const db = await getDb();
+  const transaction = db.transaction(EXERCISE_STORE, "readwrite");
+  const store = transaction.objectStore(EXERCISE_STORE);
+
+  return new Promise((resolve, reject) => {
+    const request = store.delete(id);
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error);
+    transaction.oncomplete = () => {
+      console.log(`Exercise record ${id} deleted. Transaction complete.`);
+      if (onSuccessCallback) {
+        console.log("Calling onSuccessCallback for deleteExerciseRecord.");
+        onSuccessCallback();
+      }
+    };
+    transaction.onerror = () => reject(transaction.error);
+  });
+}
 // --- Study Records ---
 
 export async function addStudyRecord(
@@ -237,6 +281,28 @@ export async function getAllStudyRecords(): Promise<StudyRecord[]> {
         request.onerror = () => reject(request.error);
         transaction.onerror = () => reject(transaction.error);
     });
+}
+export async function deleteStudyRecord(
+  id: string,
+  onSuccessCallback?: () => void
+): Promise<void> {
+  const db = await getDb();
+  const transaction = db.transaction(STUDY_STORE, "readwrite");
+  const store = transaction.objectStore(STUDY_STORE);
+
+  return new Promise((resolve, reject) => {
+    const request = store.delete(id);
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error);
+    transaction.oncomplete = () => {
+      console.log(`Study record ${id} deleted. Transaction complete.`);
+      if (onSuccessCallback) {
+        console.log("Calling onSuccessCallback for deleteStudyRecord.");
+        onSuccessCallback();
+      }
+    };
+    transaction.onerror = () => reject(transaction.error);
+  });
 }
 // --- Daily Summaries ---
 

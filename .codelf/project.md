@@ -66,9 +66,10 @@ self-discipline-pwa/
 
 **Data Flow:**
 - Clear frontend state management: Using Preact Signals (`@preact/signals`) managed within a global Context (`SettingsContext.tsx`) for theme and language state. State is persisted in localStorage via effects in the provider. Page components (`routes/*.tsx`) and interactive Island components (`islands/*.tsx`) consume this context via `useContext` to access state (like theme) and computed values (like translations `t`).
-- Data Fetching in Islands: Components like `DailySummaryChart.tsx` fetch data directly from `services/db.ts` (using functions like `getDailySummaries`) within `useEffect` hooks.
+- Data Fetching in Islands: Components like `DailySummaryChart.tsx` fetch data directly from `services/db.ts` (using functions like `getDailySummaries`) within `useEffect` hooks. List components (`islands/*List.tsx`) fetch all records.
+- Data Modification: Form components (`islands/*Form.tsx`) call add functions in `services/db.ts`. List components (`islands/*List.tsx`) now call delete functions (`deleteSleepRecord`, `deleteExerciseRecord`, `deleteStudyRecord`) in `services/db.ts`. Callbacks (`incrementDataVersion`) are used to trigger potential UI updates in other components listening to `dataVersion` signal.
 - Data validation on both frontend (client-side islands) and backend (API routes).
-- Standardized asynchronous operation handling: Use `fetch` API within islands or server components.
+- Standardized asynchronous operation handling: Use `fetch` API within islands or server components. Use `async/await` for IndexedDB operations in `services/db.ts`.
 
 ### Performance and Security
 **Performance Optimization Focus:**
@@ -91,7 +92,7 @@ self-discipline-pwa/
 
 > The main purpose is to provide a simple, modern, and customizable interface for users to log and visualize their self-discipline efforts through heatmaps, daily summaries, and detailed lists.
 
-> Project Status: Core features implemented. Global settings functional. Basic PWA capabilities added. Homepage dashboard refactored to display daily summary charts within their respective heatmap sections.
+> Project Status: Core features implemented (logging, history view with **deletion for all record types**, heatmaps, daily summaries). Global settings functional. Basic PWA capabilities added. **Fixed sleep form error message persistence.**
 
 > Project Team: Roo (AI Engineer) and User
 
@@ -147,16 +148,16 @@ self-discipline-pwa/
 │   ├── DailySummaryChart.tsx # Component for daily summary bar charts
 │   ├── ExerciseForm.tsx
 │   ├── ExerciseHeatmapSection.tsx # Displays Exercise heatmap and daily summary chart
-│   ├── ExerciseList.tsx
+│   ├── ExerciseList.tsx  # Displays exercise history with delete buttons
 │   ├── Heatmap.tsx     # Generic heatmap component
 │   ├── PageTitle.tsx   # Island for rendering translated page titles
 │   ├── SettingsManager.tsx # UI for language/theme switching (uses SettingsContext)
-│   ├── SleepForm.tsx
+│   ├── SleepForm.tsx   # Form for logging sleep (error messages now clear on input)
 │   ├── SleepHeatmapSection.tsx # Displays Sleep heatmap and daily summary chart
-│   ├── SleepList.tsx
+│   ├── SleepList.tsx   # Displays sleep history with delete buttons
 │   ├── StudyForm.tsx
 │   ├── StudyHeatmapSection.tsx # Displays Study heatmap and daily summary chart
-│   └── StudyList.tsx
+│   └── StudyList.tsx   # Displays study history with delete buttons
 ├── locales/            # Internationalization (i18n) resource files
 │   ├── en.json         # English translations
 │   └── zh.json         # Chinese translations
@@ -172,7 +173,7 @@ self-discipline-pwa/
 │   └── greet/
 │       └── [name].tsx  # Example dynamic route
 ├── services/           # Data interaction services
-│   └── db.ts           # IndexedDB service functions (includes getDailySummaries)
+│   └── db.ts           # IndexedDB service functions (includes add*, getAll*, getDailySummaries, delete*)
 ├── static/             # Static assets
 │   ├── favicon.ico
 │   ├── logo.svg        # (Used in manifest, keep or replace with proper icons)

@@ -94,7 +94,10 @@ export default function SleepForm() {
           id="sleepTime"
           name="sleepTime"
           value={sleepTime}
-          onInput={(e) => setSleepTime((e.target as HTMLInputElement).value)}
+          onInput={(e) => {
+            setSleepTime((e.target as HTMLInputElement).value);
+            setError(null); // Clear error on input
+          }}
           disabled={disabled}
           required
           class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 disabled:opacity-50"
@@ -107,7 +110,10 @@ export default function SleepForm() {
           id="wakeTime"
           name="wakeTime"
           value={wakeTime}
-          onInput={(e) => setWakeTime((e.target as HTMLInputElement).value)}
+          onInput={(e) => {
+            setWakeTime((e.target as HTMLInputElement).value);
+            setError(null); // Clear error on input
+          }}
           disabled={disabled}
           required
           class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 disabled:opacity-50"
@@ -120,7 +126,10 @@ export default function SleepForm() {
           name="notes"
           rows={3}
           value={notes}
-          onInput={(e) => setNotes((e.target as HTMLTextAreaElement).value)}
+          onInput={(e) => {
+            setNotes((e.target as HTMLTextAreaElement).value);
+            setError(null); // Clear error on input
+          }}
           disabled={disabled}
           class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 disabled:opacity-50"
           placeholder={currentT.placeholderSleepNotes} // Use translation

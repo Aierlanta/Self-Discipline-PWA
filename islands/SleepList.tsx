@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from "preact/hooks"; // Import useContext
 import { IS_BROWSER } from "$fresh/runtime.ts";
 import type { SleepRecord } from "../types/records.ts";
-import { getAllSleepRecords } from "../services/db.ts";
+import { getAllSleepRecords, deleteSleepRecord } from "../services/db.ts"; // Import deleteSleepRecord
 import { SettingsContext } from "../contexts/SettingsContext.tsx"; // Import context
 
 // Helper function to format duration
@@ -64,6 +64,28 @@ export default function SleepList() {
 
   }, []); // Empty dependency array means run once on mount
 
+  const handleDelete = async (id: string) => {
+    // Add confirmation dialog
+    if (!window.confirm(currentT.confirmDeleteSleep)) {
+      return;
+    }
+
+    try {
+      await deleteSleepRecord(id, () => {
+        // Update state after successful deletion
+        setRecords((prevRecords) => prevRecords.filter((record) => record.id !== id));
+        console.log(`Record ${id} deleted successfully from UI.`);
+      });
+    } catch (err) {
+      console.error(`Failed to delete sleep record ${id}:`, err);
+      const message = err instanceof Error ? err.message : String(err);
+      // Display error to user (consider a more robust notification system)
+      setError(currentT.errorFailedToDelete.replace("{message}", message));
+      // Optionally clear the error after a few seconds
+      setTimeout(() => setError(null), 5000);
+    }
+  };
+
   // Use context for SSR placeholder as well
   if (!IS_BROWSER) {
     // Render placeholder or nothing during SSR for islands fetching client-side data
@@ -91,8 +113,8 @@ export default function SleepList() {
       {!isLoading && !error && records.length > 0 && (
         <ul class="space-y-3">
           {records.map((record) => (
-            <li key={record.id} class="p-3 border-b border-gray-200 dark:border-gray-700 last:border-b-0 flex flex-col sm:flex-row justify-between items-start sm:items-center">
-              <div>
+            <li key={record.id} class="p-3 border-b border-gray-200 dark:border-gray-700 last:border-b-0 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2"> {/* Added gap */}
+              <div class="flex-grow"> {/* Allow text content to grow */}
                 <p class="text-sm text-gray-600 dark:text-gray-400">
                   {/* Use the correct translation key from context */}
                   <span class="font-medium text-gray-800 dark:text-gray-200">{currentT.labelSleep}</span> {formatDateTime(record.sleepTime, currentT)} {/* Pass t */}
@@ -104,10 +126,23 @@ export default function SleepList() {
                  {/* Use the correct translation key from context */}
                  {record.notes && <p class="text-xs mt-1 text-gray-500 dark:text-gray-400 italic">{currentT.labelNotes} {record.notes}</p>}
               </div>
-              <p class="mt-2 sm:mt-0 text-lg font-semibold text-indigo-600 dark:text-indigo-400">
-                {/* Pass t to helper */}
-                {formatDuration(record.durationMinutes, currentT)}
-              </p>
+              <div class="flex items-center gap-2 flex-shrink-0"> {/* Container for duration and button */}
+                <p class="text-lg font-semibold text-indigo-600 dark:text-indigo-400">
+                  {/* Pass t to helper */}
+                  {formatDuration(record.durationMinutes, currentT)}
+                </p>
+                <button
+                  onClick={() => handleDelete(record.id)}
+                  title={currentT.deleteRecordTooltip} // Add tooltip
+                  class="p-1 text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 rounded"
+                >
+                  {/* Simple 'X' icon or use an SVG icon component */}
+                  {/* Trash Can SVG Icon */}
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                  </svg>
+                </button>
+              </div>
             </li>
           ))}
         </ul>

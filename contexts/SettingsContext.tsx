@@ -79,6 +79,9 @@ interface Translations {
   labelSleep: string; // In list item
   labelWake: string; // In list item
   labelNotes: string; // In list item
+  confirmDeleteSleep: string; // Confirmation message for deleting sleep record
+  errorFailedToDelete: string; // Error message when deletion fails, e.g., "Failed to delete: {message}"
+  deleteRecordTooltip: string; // Tooltip for the delete button
   // ExerciseForm keys
   errorFillAllFields: string;
   errorPositiveDuration: string;
@@ -94,6 +97,8 @@ interface Translations {
   // ExerciseList keys
   exerciseHistoryTitle: string;
   noExerciseRecords: string;
+  confirmDeleteExercise: string; // Confirmation message for deleting exercise record
+  errorFailedToDeleteExercise: string; // Error message when exercise deletion fails, e.g., "Failed to delete exercise: {message}"
   // StudyForm keys
   errorFillAllStudyFields: string;
   alertStudyLogged: string; // e.g., "Study logged: {topic} for {duration} minutes."
@@ -105,6 +110,8 @@ interface Translations {
   // StudyList keys
   studyHistoryTitle: string;
   noStudyRecords: string;
+  confirmDeleteStudy: string; // Confirmation message for deleting study record
+  errorFailedToDeleteStudy: string; // Error message when study deletion fails, e.g., "Failed to delete study: {message}"
   // Heatmap Section keys
   loadingHeatmap: string;
   loadingHeatmapData: string;
